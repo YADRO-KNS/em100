@@ -27,6 +27,8 @@ For help, use the -h option:
 Usage:
   -c|--set CHIP:                  select chip emulation
   -d|--download FILE:             download FILE into EM100pro
+  -a|--start address:             only works with -d (E.g. -d file.bin -a 0x300000)
+  -m|--address-mode MODE:         force 3 or 4 byte address mode
   -u|--upload FILE:               upload from EM100pro into FILE
   -r|--start:                     em100 shall run
   -s|--stop:                      em100 shall stop
@@ -38,10 +40,13 @@ Usage:
   -f|--firmware-dump FILE:        export raw EM100pro firmware to file
   -g|--firmware-write FILE:       export EM100pro firmware to DPFW file
   -S|--set-serialno NUM:          set serial number to NUM
+  -V|--set-voltage [1.8|3.3]      switch FPGA voltage
   -p|--holdpin [LOW|FLOAT|INPUT]: set the hold pin state
   -x|--device BUS:DEV             use EM100pro on USB bus/device
   -x|--device DPxxxxxx            use EM100pro with serial no DPxxxxxx
   -l|--list-devices               list all connected EM100pro devices
+  -U|--update-files               update device (chip) and firmware database
+  -C|--compatible                 enable compatibility mode (patch image for EM100Pro)
   -D|--debug:                     print debug information.
   -h|--help:                      this help text
 
