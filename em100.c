@@ -69,6 +69,24 @@ static void get_current_state(struct em100 *em100)
 		printf("EM100Pro state unknown\n");
 }
 
+static int set_address_mode(struct em100 *em100, int mode)
+{
+	int retval;
+
+	if (mode < 3 || mode > 4) {
+		printf("Invalid address mode: %d\n", mode);
+		return -1;
+	}
+
+	retval = write_fpga_register(em100, 0x4f, mode == 4);
+	if (retval)
+		printf("Enabled %d byte address mode\n", mode);
+	else
+		printf("Failed to enable %d byte address mode\n", mode);
+
+	return retval;
+}
+
 static const char *get_pin_string(int pin) {
 	switch (pin) {
 	case 0:
@@ -751,6 +769,7 @@ static const struct option longopts[] = {
 	{"set", 1, 0, 'c'},
 	{"download", 1, 0, 'd'},
 	{"start-address", 1, 0, 'a'},
+	{"address-mode", 1, 0, 'm'},
 	{"start", 0, 0, 'r'},
 	{"stop", 0, 0, 's'},
 	{"verify", 0, 0, 'v'},
@@ -779,6 +798,7 @@ static void usage(char *name)
 		"  -c|--set CHIP:                  select chip emulation\n"
 		"  -d|--download FILE:             download FILE into EM100pro\n"
 		"  -a|--start address:             only works with -d (E.g. -d file.bin -a 0x300000)\n"
+	        "  -m|--address-mode MODE:         force 3 or 4 byte address mode\n"
 		"  -u|--upload FILE:               upload from EM100pro into FILE\n"
 		"  -r|--start:                     em100 shall run\n"
 		"  -s|--stop:                      em100 shall stop\n"
@@ -815,12 +835,13 @@ int main(int argc, char **argv)
 	int compatibility = 0;
 	int bus = 0, device = 0;
 	int firmware_is_dpfw = 0;
+	int address_mode = 0;
 	unsigned int serial_number = 0;
 	unsigned long address_offset = 0;
 	unsigned int spi_start_address = 0;
 	const char *voltage = NULL;
 
-	while ((opt = getopt_long(argc, argv, "c:d:a:u:rsvtO:F:f:g:S:V:p:DCx:lUhT",
+	while ((opt = getopt_long(argc, argv, "c:d:a:m:u:rsvtO:F:f:g:S:V:p:DCx:lUhT",
 				  longopts, &idx)) != -1) {
 		switch (opt) {
 		case 'c':
@@ -833,6 +854,9 @@ int main(int argc, char **argv)
 		case 'a':
 			sscanf(optarg, "%x", &spi_start_address);
 			printf("SPI address: 0x%08x\n", spi_start_address);
+			break;
+		case 'm':
+			sscanf(optarg, "%d", &address_mode);
 			break;
 		case 'u':
 			read_filename = optarg;
@@ -991,6 +1015,19 @@ int main(int argc, char **argv)
 			return 0;
 		}
 		printf("Chip set to %s %s.\n", chip->vendor, chip->name);
+
+		/* Automatically enable 4 byte address mode for chips >16MB
+		 * unless specified by the user on the command line.
+		 */
+		if (!address_mode && chip->size > (16 * 1024 * 1024)) {
+			set_address_mode(&em100, 4);
+		}
+	}
+
+	if (address_mode) {
+		if (set_address_mode(&em100, address_mode) < 0) {
+			return 1;
+		}
 	}
 
 	if (voltage) {
