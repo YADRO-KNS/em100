@@ -267,7 +267,9 @@ int firmware_update(struct em100 *em100, const char *filename, int verify)
 
 	if (!strncasecmp(filename, "auto", 5)) {
 		printf("\nAutomatic firmware update.\n");
-		TFILE *f = tar_load_compressed(get_em100_file("firmware.tar.xz"));
+		char *firmware_bundle = get_em100_file("firmware.tar.xz");
+		TFILE *f = tar_load_compressed(firmware_bundle);
+		free(firmware_bundle);
 		firmware_update_t data;
 		data.em100 = em100;
 		data.autoupdate_file = NULL;
