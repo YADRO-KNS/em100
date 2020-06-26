@@ -36,6 +36,7 @@ const char *version_name = "VERSION";
 #define TIMEOPT CURLINFO_TOTAL_TIME_T
 #define MINIMAL_PROGRESS_FUNCTIONALITY_INTERVAL     3000000
 
+#if LIBCURL_VERSION_NUM >= 0x073200
 static int xferinfo(void *p __unused,
 		    curl_off_t dltotal __unused, curl_off_t dlnow __unused,
 		    curl_off_t ultotal __unused, curl_off_t ulnow __unused)
@@ -51,6 +52,7 @@ static int xferinfo(void *p __unused,
 	pos = (pos + 1) % 4;
 	return 0;
 }
+#endif
 
 static size_t write_data(void *ptr, size_t size, size_t nmemb,
 			 void *stream)
@@ -58,7 +60,7 @@ static size_t write_data(void *ptr, size_t size, size_t nmemb,
 	return fwrite(ptr, size, nmemb, (FILE *) stream);
 }
 
-static int curl_get(const char *id, const char *filename, int progress)
+static int curl_get(const char *id, const char *filename, int progress __unused)
 {
 	FILE *file;
 	CURLcode res;
@@ -97,6 +99,7 @@ static int curl_get(const char *id, const char *filename, int progress)
 	/* Write data to this file handle */
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
 
+#if LIBCURL_VERSION_NUM >= 0x073200
 	if (progress) {
 		/* Simple progress indicator function */
 		curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, xferinfo);
@@ -104,6 +107,7 @@ static int curl_get(const char *id, const char *filename, int progress)
 		/* Enable progress indicator */
 		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 	}
+#endif
 
 	/* Follow redirections (as used by Google Drive) */
 	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION , 1L);
