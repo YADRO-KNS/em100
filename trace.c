@@ -124,6 +124,10 @@ struct spi_cmd_values spi_command_list[] = {
 		{"read JEDEC ID",		0x9f,	0,	0},
 		{"chip erase",			0xc7,	0,	0},
 		{"sector erase",		0xd8,	1,	0},
+		{"enter 4-byte address mode",	0xb7,	0,	0},
+		{"exit 4-byte address mode",	0xe9,	0,	0},
+		{"enter quad i/o mode",		0x35,	0,	0},
+		{"exit quat i/o mode",		0xf5,	0,	0},
 
 		{"unknown command",		0xff,	0,	0}
 };
