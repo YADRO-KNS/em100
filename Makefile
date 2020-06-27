@@ -71,6 +71,14 @@ clean:
 distclean: clean
 	rm -f em100pro_chips.h
 
+install: em100 60-dediprog-em100pro.rules
+	install -m 644 60-dediprog-em100pro.rules /etc/udev/rules.d/
+	install -s -m 750 -g plugdev em100 /usr/local/bin/
+
+uninstall: /usr/local/bin/em100
+	rm -f /etc/udev/rules.d/60-dediprog-em100pro.rules
+	rm -f /usr/local/bin/em100
+
 -include .dependencies
 
 .PHONY: clean distclean tarballs
